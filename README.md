@@ -31,10 +31,11 @@ which types of events have the greatest economic consequences? Some data
 cleaning is perform before the data is explored for desciptive analysis.
 The report is found on my RPUB page at \<\> Also in [this link]()
 
-\#\#DISCLAIMER This report is for academic purposes and should not be
-used for decision making that can affect lives and economies. It is done
-to my best of knowledge as a Data Science Learner. Nonetheless, the data
-can be used to make your own inference. This Report is also made to be
-as Reproducible as possible, therefor is for some reason the report is
-good to be used, follow through to verify before use. Thank You
-\#-JEROME
+## DISCLAIMER
+
+This report is for academic purposes and should not be used for decision
+making that can affect lives and economies. It is done to my best of
+knowledge as a Data Science Learner. Nonetheless, the data can be used
+to make your own inference. This Report is also made to be as
+Reproducible as possible, therefor is for some reason the report is good
+to be used, follow through to verify before use. Thank You
