@@ -148,17 +148,17 @@ The database was explored and results suggest tornado cause both the highest pub
 [1] Reproducible Research Final Project in the John Hopkins University Data Science Specialization course on coursera <https://www.coursera.org/learn/reproducible-research/#syllabus>
 
 ## Apendix {#apendix}
-####1- Content of the init.R file {#code}
+#### 1- Content of the init.R file {#code}
 ```{r engine='bash', comment=''}
 cat init.R
 ```
 
-####2- EVTYPE {#evtype}
+#### 2- EVTYPE {#evtype}
 ```{r}
 levels(dataSub$EVTYPE)
 ```
 
-####3- Heat Related Weather {#heatrelated}
+#### 3- Heat Related Weather {#heatrelated}
 ```{r heatRel}
 cat(levels(as.factor(heatRel)), sep = ", ")
 ```
