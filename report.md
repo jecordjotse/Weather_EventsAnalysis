@@ -215,14 +215,16 @@ p + coord_flip()
 ```
 
 ![](report_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
 ## Conclusion
-The database was explored and results suggest tornado cause both the highest public health issues and economic consequences
+The database was explored and results suggest tornado cause both the highest public health issues and economic consequences.
+A more detail project can be found in [my GitHub repo](https://github.com/jecordjotse/Weather_EventsAnalysis)
 
 ## REFERENCE {#refer}
 [1] Reproducible Research Final Project in the John Hopkins University Data Science Specialization course on coursera <https://www.coursera.org/learn/reproducible-research/#syllabus>
 
 ## Apendix {#apendix}
-####1- Content of the init.R file {#code}
+#### 1- Content of the init.R file {#code}
 
 ```bash
 cat init.R
@@ -268,7 +270,7 @@ if(!exists("dataSet")){
 }
 ```
 
-####2- EVTYPE {#evtype}
+#### 2- EVTYPE {#evtype}
 
 ```r
 levels(dataSub$EVTYPE)
@@ -417,7 +419,7 @@ levels(dataSub$EVTYPE)
 ## [279] "wet year"                   "wintry mix"
 ```
 
-####3- Heat Related Weather {#heatrelated}
+#### 3- Heat Related Weather {#heatrelated}
 
 ```r
 cat(levels(as.factor(heatRel)), sep = ", ")

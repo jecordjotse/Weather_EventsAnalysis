@@ -141,8 +141,10 @@ p<-ggplot(data=arrange(meltedDMGByType,desc(value)), aes(x=reorder(EVTYPE, -valu
 
 p + coord_flip()
 ```
+
 ## Conclusion
-The database was explored and results suggest tornado cause both the highest public health issues and economic consequences
+The database was explored and results suggest tornado cause both the highest public health issues and economic consequences.
+A more detail project can be found in [my GitHub repo](https://github.com/jecordjotse/Weather_EventsAnalysis)
 
 ## REFERENCE {#refer}
 [1] Reproducible Research Final Project in the John Hopkins University Data Science Specialization course on coursera <https://www.coursera.org/learn/reproducible-research/#syllabus>
