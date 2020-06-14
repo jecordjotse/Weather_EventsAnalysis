@@ -19,6 +19,7 @@ dataSet$EVTYPE <- tolower(dataSet$EVTYPE)
 View(dataSet)
 as.factor(dataSet[,8])
 dataSub <- dataSet[,names(dataSet)[c(1,5,6,7,8,23,24,25,26,27,28)]]
+
 dataSub$EVTYPE <-gsub("(^[[:space:]]+|[[:space:]]+$)", "", dataSub$EVTYPE)
 dataSub$EVTYPE <-gsub("\\s+", " ", dataSub$EVTYPE)
 #cleaning EVTYPE
@@ -47,6 +48,7 @@ dataSub[grepl("rip current",dataSub$EVTYPE),]$EVTYPE <- "rip currents"
 dataSub[grepl(".*fire.*",dataSub$EVTYPE),]$EVTYPE <- "fire related"
 dataSub[grepl(".*hurricane.*",dataSub$EVTYPE),]$EVTYPE <- "hurricane"
 dataSub[grepl(".*surf.*",dataSub$EVTYPE),]$EVTYPE <- "surf related"
+dataSub[grepl("thunderstorm w",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm wind"
 
 dataSub$EVTYPE <- as.factor(dataSub$EVTYPE)
 #dataSub$EVTYPE <- gsub("win","winds",dataSub$EVTYPE, fixed = TRUE)
@@ -92,21 +94,51 @@ p + coord_flip()
 
 healthIssuesByType <- head(healthIssuesByType, 100)
 
+levels(as.factor(dataSub$PROPDMGEXP))
+dataSub$PROPDMGEXP <- tolower(dataSub$PROPDMGEXP)
+dataSub[grepl("[0-8]",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "10"
+dataSub[!grepl("[0-8]|b|h|k|m|-|\\+",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "0"
+dataSub[grepl("-",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "0"
+dataSub[grepl("\\+",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1"
+dataSub[grepl("h",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "100"
+dataSub[grepl("k",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000"
+dataSub[grepl("m",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000000"
+dataSub[grepl("b",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000000000"
+
+dataSub$PROPDMGEXP <- as.numeric(dataSub$PROPDMGEXP)
+dataSub <- dataSub %>% mutate(PROPDMG = PROPDMG * PROPDMGEXP)
+
+levels(as.factor(dataSub$CROPDMGEXP))
+dataSub$CROPDMGEXP <- tolower(dataSub$CROPDMGEXP)
+dataSub[grepl("[0-8]",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "10"
+dataSub[!grepl("[0-8]|b|h|k|m|-|\\+",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "0"
+#dataSub[grepl("-",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "0"
+#dataSub[grepl("\\+",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1"
+#dataSub[grepl("h",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "100"
+dataSub[grepl("k",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000"
+dataSub[grepl("m",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000000"
+dataSub[grepl("b",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000000000"
+
+dataSub$CROPDMGEXP <- as.numeric(dataSub$CROPDMGEXP)
+dataSub <- dataSub %>% mutate(CROPDMGEXP = CROPDMG * CROPDMGEXP)
 
 propertyDMGByType <-aggregate(PROPDMG ~ EVTYPE, dataSub, sum)
-nrow(filter(propertyDMGByType, PROPDMG >0))
-filter(propertyDMGByType, PROPDMG >0)
+#nrow(filter(propertyDMGByType, PROPDMG >0))
+#filter(propertyDMGByType, PROPDMG >0)
 propertyDMGNonZero <- propertyDMGByType %>% filter(PROPDMG >0) %>% arrange(desc(PROPDMG))
-cropDMGByType <-aggregate(CROPDMG ~ EVTYPE, dataSub, sum)
-nrow(filter(cropDMGByType, CROPDMG > 0))
-filter(cropDMGByType, CROPDMG > 0)
+cropDMGByType <- aggregate(CROPDMG ~ EVTYPE, dataSub, sum)
+#nrow(filter(cropDMGByType, CROPDMG > 0))
+#filter(cropDMGByType, CROPDMG > 0)
 cropDMGNonZero <- cropDMGByType %>% filter(CROPDMG >0) %>% arrange(desc(CROPDMG))
 
 #names(dataSet)
+
 econDMGByType <- merge(propertyDMGByType,cropDMGByType,by='EVTYPE')
 temp <- head(econDMGByType,20)
 meltedDMGByType <- melt(temp, measure.vars = c("CROPDMG","PROPDMG"), id = "EVTYPE")
 econDMGByType <- econDMGByType %>% mutate(ECONDMG = CROPDMG + PROPDMG) %>% filter(ECONDMG >0) %>% arrange(desc(ECONDMG))
+
+meltedDMGByType <- melt(econDMGByType, measure.vars = c("CROPDMG","PROPDMG"), id = "EVTYPE")
 
 p<-ggplot(data=arrange(meltedDMGByType,desc(value)), aes(x=reorder(EVTYPE, -value), y=value,fill=variable)) +
 geom_bar(stat="identity")

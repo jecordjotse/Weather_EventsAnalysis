@@ -131,12 +131,12 @@ dataSub$EVTYPE <- gsub("wins","wind",dataSub$EVTYPE, fixed = TRUE)
 # rename all tstm & wrongly spelt thunderstorm to thunderstorm
 dataSub$EVTYPE <- gsub("tstm","thunderstorm",dataSub$EVTYPE, fixed = TRUE)
 dataSub$EVTYPE <- gsub("thun[a-z]+m","thunderstorm",dataSub$EVTYPE, fixed = TRUE)
-dataSub$EVTYPE <- gsub("thunderstormwinds","thunderstorm w",dataSub$EVTYPE, fixed = TRUE)
-dataSub$EVTYPE <- gsub("thunderstormw","thunderstorm w",dataSub$EVTYPE, fixed = TRUE)
+dataSub$EVTYPE <- gsub("thunderstormwinds","tstm w",dataSub$EVTYPE, fixed = TRUE)
+dataSub$EVTYPE <- gsub("thunderstormw","tstm w",dataSub$EVTYPE, fixed = TRUE)
  # replace events with a group name
-dataSub[grepl("thunderstorm wind",dataSub$EVTYPE, fixed = TRUE),]$EVTYPE <- "thunderstorm w"
-dataSub[grepl("thun.+ wind",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm w"
-dataSub[grepl("thunderstorm w inds",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm w"
+dataSub[grepl("thunderstorm wind",dataSub$EVTYPE, fixed = TRUE),]$EVTYPE <- "tstm w"
+dataSub[grepl("thun.+ wind",dataSub$EVTYPE),]$EVTYPE <- "tstm w"
+dataSub[grepl("thunderstorm w inds",dataSub$EVTYPE),]$EVTYPE <- "tstm w"
 dataSub[grepl("tornado",dataSub$EVTYPE),]$EVTYPE <- "tornado"
 dataSub[grepl("torndao",dataSub$EVTYPE),]$EVTYPE <- "tornado"
 dataSub[grepl("avalance",dataSub$EVTYPE),]$EVTYPE <- "avalanche"
@@ -151,7 +151,9 @@ dataSub[grepl("rip current",dataSub$EVTYPE),]$EVTYPE <- "rip currents"
 dataSub[grepl(".*fire.*",dataSub$EVTYPE),]$EVTYPE <- "fire related"
 dataSub[grepl(".*hurricane.*",dataSub$EVTYPE),]$EVTYPE <- "hurricane"
 dataSub[grepl(".*surf.*",dataSub$EVTYPE),]$EVTYPE <- "surf related"
-dataSub[grepl("thunderstorm w",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm wind"
+dataSub[grepl("thunderstorm",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm"
+dataSub[grepl("tstm w",dataSub$EVTYPE),]$EVTYPE <- "thunderstorm wind"
+dataSub[grepl("tropical storm",dataSub$EVTYPE),]$EVTYPE <- "tropical storm"
 
 dataSub$EVTYPE <- as.factor(dataSub$EVTYPE)
 # all other winds
@@ -187,7 +189,31 @@ p + coord_flip()
 
 ![](report_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-The economic consequences will be measured by property damage and crop damage. The total cost of property damage and crop damage for category of EVTYPE is calculated.
+The economic consequences will be measured by property damage and crop damage. The total cost of property damage and crop damage for category of EVTYPE is calculated. [[2]](#refer) Not the values include exponents that must tbe included.
+
+```r
+dataSub$PROPDMGEXP <- tolower(dataSub$PROPDMGEXP)
+dataSub[grepl("[0-8]",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "10"
+dataSub[!grepl("[0-8]|b|h|k|m|-|\\+",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "0"
+dataSub[grepl("-",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "0"
+dataSub[grepl("\\+",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1"
+dataSub[grepl("h",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "100"
+dataSub[grepl("k",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000"
+dataSub[grepl("m",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000000"
+dataSub[grepl("b",dataSub$PROPDMGEXP),]$PROPDMGEXP <- "1000000000"
+dataSub$PROPDMGEXP <- as.numeric(dataSub$PROPDMGEXP)
+dataSub <- dataSub %>% mutate(PROPDMG = PROPDMG * PROPDMGEXP)
+dataSub$CROPDMGEXP <- tolower(dataSub$CROPDMGEXP)
+dataSub[grepl("[0-8]",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "10"
+dataSub[!grepl("[0-8]|b|h|k|m|-|\\+",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "0"
+dataSub[grepl("k",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000"
+dataSub[grepl("m",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000000"
+dataSub[grepl("b",dataSub$CROPDMGEXP),]$CROPDMGEXP <- "1000000000"
+dataSub$CROPDMGEXP <- as.numeric(dataSub$CROPDMGEXP)
+dataSub <- dataSub %>% mutate(CROPDMG = CROPDMG * CROPDMGEXP)
+```
+
+Now to aggregate;
 
 ```r
 propertyDMGByType <- aggregate(PROPDMG ~ EVTYPE, dataSub, sum)
@@ -214,7 +240,7 @@ p<-ggplot(data=arrange(meltedDMGByType,desc(value)), aes(x=reorder(EVTYPE, -valu
 p + coord_flip()
 ```
 
-![](report_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](report_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ## Conclusion
 The database was explored and results suggest tornado cause both the highest public health issues and economic consequences.
@@ -222,6 +248,8 @@ A more detail project can be found in [my GitHub repo](https://github.com/jecord
 
 ## REFERENCE {#refer}
 [1] Reproducible Research Final Project in the John Hopkins University Data Science Specialization course on coursera <https://www.coursera.org/learn/reproducible-research/#syllabus>
+
+[2] How To Handle Exponent Value of PROPDMGEXP and CROPDMGEXP <https://rstudio-pubs-static.s3.amazonaws.com/58957_37b6723ee52b455990e149edde45e5b6.html>
 
 ## Apendix {#apendix}
 #### 1- Content of the init.R file {#code}
@@ -348,75 +376,71 @@ levels(dataSub$EVTYPE)
 ## [137] "rip currents"               "rock slide"                
 ## [139] "rogue wave"                 "rotating wall cloud"       
 ## [141] "rough seas"                 "saharan dust"              
-## [143] "seiche"                     "severe thunderstorm"       
-## [145] "severe thunderstorms"       "severe turbulence"         
-## [147] "sleet"                      "sleet storm"               
-## [149] "small stream"               "small stream and"          
-## [151] "smoke"                      "snow related"              
-## [153] "southeast"                  "storm surge"               
-## [155] "storm surge/tide"           "summary august 10"         
-## [157] "summary august 11"          "summary august 17"         
-## [159] "summary august 2-3"         "summary august 21"         
-## [161] "summary august 28"          "summary august 4"          
-## [163] "summary august 7"           "summary august 9"          
-## [165] "summary jan 17"             "summary july 23-24"        
-## [167] "summary june 18-19"         "summary june 5-6"          
-## [169] "summary june 6"             "summary of april 12"       
-## [171] "summary of april 13"        "summary of april 21"       
-## [173] "summary of april 27"        "summary of april 3rd"      
-## [175] "summary of august 1"        "summary of july 11"        
-## [177] "summary of july 2"          "summary of july 22"        
-## [179] "summary of july 26"         "summary of july 29"        
-## [181] "summary of july 3"          "summary of june 10"        
-## [183] "summary of june 11"         "summary of june 12"        
-## [185] "summary of june 13"         "summary of june 15"        
-## [187] "summary of june 16"         "summary of june 18"        
-## [189] "summary of june 23"         "summary of june 24"        
-## [191] "summary of june 3"          "summary of june 30"        
-## [193] "summary of june 4"          "summary of june 6"         
-## [195] "summary of march 14"        "summary of march 23"       
-## [197] "summary of march 24"        "summary of march 24-25"    
-## [199] "summary of march 27"        "summary of march 29"       
-## [201] "summary of may 10"          "summary of may 13"         
-## [203] "summary of may 14"          "summary of may 22"         
-## [205] "summary of may 22 am"       "summary of may 22 pm"      
-## [207] "summary of may 26 am"       "summary of may 26 pm"      
-## [209] "summary of may 31 am"       "summary of may 31 pm"      
-## [211] "summary of may 9-10"        "summary sept. 25-26"       
-## [213] "summary september 20"       "summary september 23"      
-## [215] "summary september 3"        "summary september 4"       
-## [217] "summary: nov. 16"           "summary: nov. 6-7"         
-## [219] "summary: oct. 20-21"        "summary: october 31"       
-## [221] "summary: sept. 18"          "surf related"              
-## [223] "temperature record"         "thunderstorm"              
-## [225] "thunderstorm damage"        "thunderstorm damage to"    
-## [227] "thunderstorm wind"          "thunderstorms"             
-## [229] "tornado"                    "tropical depression"       
-## [231] "tropical storm"             "tropical storm alberto"    
-## [233] "tropical storm dean"        "tropical storm gordon"     
-## [235] "tropical storm jerry"       "tsunami"                   
-## [237] "typhoon"                    "unseasonably cool"         
-## [239] "unseasonably cool & wet"    "unseasonably dry"          
-## [241] "unseasonably hot"           "unseasonably warm"         
-## [243] "unseasonably warm & wet"    "unseasonably warm and dry" 
-## [245] "unseasonably warm year"     "unseasonably warm/wet"     
-## [247] "unseasonably wet"           "unseasonal low temp"       
-## [249] "unusual warmth"             "unusual/record warmth"     
-## [251] "unusually warm"             "urban and small"           
-## [253] "urban and small stream"     "urban small"               
-## [255] "urban/small"                "urban/small stream"        
-## [257] "very dry"                   "very warm"                 
-## [259] "vog"                        "volcanic ash"              
-## [261] "volcanic ash plume"         "volcanic ashfall"          
-## [263] "volcanic eruption"          "wall cloud"                
-## [265] "wall cloud/funnel cloud"    "warm dry conditions"       
-## [267] "warm weather"               "water spout"               
-## [269] "waterspout"                 "waterspout funnel cloud"   
-## [271] "waterspout-"                "waterspout/"               
-## [273] "waterspouts"                "wayterspout"               
-## [275] "wet micoburst"              "wet microburst"            
-## [277] "wet month"                  "wet weather"               
-## [279] "wet year"                   "wintry mix"
+## [143] "seiche"                     "severe turbulence"         
+## [145] "sleet"                      "sleet storm"               
+## [147] "small stream"               "small stream and"          
+## [149] "smoke"                      "snow related"              
+## [151] "southeast"                  "storm surge"               
+## [153] "storm surge/tide"           "summary august 10"         
+## [155] "summary august 11"          "summary august 17"         
+## [157] "summary august 2-3"         "summary august 21"         
+## [159] "summary august 28"          "summary august 4"          
+## [161] "summary august 7"           "summary august 9"          
+## [163] "summary jan 17"             "summary july 23-24"        
+## [165] "summary june 18-19"         "summary june 5-6"          
+## [167] "summary june 6"             "summary of april 12"       
+## [169] "summary of april 13"        "summary of april 21"       
+## [171] "summary of april 27"        "summary of april 3rd"      
+## [173] "summary of august 1"        "summary of july 11"        
+## [175] "summary of july 2"          "summary of july 22"        
+## [177] "summary of july 26"         "summary of july 29"        
+## [179] "summary of july 3"          "summary of june 10"        
+## [181] "summary of june 11"         "summary of june 12"        
+## [183] "summary of june 13"         "summary of june 15"        
+## [185] "summary of june 16"         "summary of june 18"        
+## [187] "summary of june 23"         "summary of june 24"        
+## [189] "summary of june 3"          "summary of june 30"        
+## [191] "summary of june 4"          "summary of june 6"         
+## [193] "summary of march 14"        "summary of march 23"       
+## [195] "summary of march 24"        "summary of march 24-25"    
+## [197] "summary of march 27"        "summary of march 29"       
+## [199] "summary of may 10"          "summary of may 13"         
+## [201] "summary of may 14"          "summary of may 22"         
+## [203] "summary of may 22 am"       "summary of may 22 pm"      
+## [205] "summary of may 26 am"       "summary of may 26 pm"      
+## [207] "summary of may 31 am"       "summary of may 31 pm"      
+## [209] "summary of may 9-10"        "summary sept. 25-26"       
+## [211] "summary september 20"       "summary september 23"      
+## [213] "summary september 3"        "summary september 4"       
+## [215] "summary: nov. 16"           "summary: nov. 6-7"         
+## [217] "summary: oct. 20-21"        "summary: october 31"       
+## [219] "summary: sept. 18"          "surf related"              
+## [221] "temperature record"         "thunderstorm"              
+## [223] "thunderstorm wind"          "tornado"                   
+## [225] "tropical depression"        "tropical storm"            
+## [227] "tsunami"                    "typhoon"                   
+## [229] "unseasonably cool"          "unseasonably cool & wet"   
+## [231] "unseasonably dry"           "unseasonably hot"          
+## [233] "unseasonably warm"          "unseasonably warm & wet"   
+## [235] "unseasonably warm and dry"  "unseasonably warm year"    
+## [237] "unseasonably warm/wet"      "unseasonably wet"          
+## [239] "unseasonal low temp"        "unusual warmth"            
+## [241] "unusual/record warmth"      "unusually warm"            
+## [243] "urban and small"            "urban and small stream"    
+## [245] "urban small"                "urban/small"               
+## [247] "urban/small stream"         "very dry"                  
+## [249] "very warm"                  "vog"                       
+## [251] "volcanic ash"               "volcanic ash plume"        
+## [253] "volcanic ashfall"           "volcanic eruption"         
+## [255] "wall cloud"                 "wall cloud/funnel cloud"   
+## [257] "warm dry conditions"        "warm weather"              
+## [259] "water spout"                "waterspout"                
+## [261] "waterspout funnel cloud"    "waterspout-"               
+## [263] "waterspout/"                "waterspouts"               
+## [265] "wayterspout"                "wet micoburst"             
+## [267] "wet microburst"             "wet month"                 
+## [269] "wet weather"                "wet year"                  
+## [271] "wintry mix"
 ```
 
 #### 3- Heat Related Weather {#heatrelated}
