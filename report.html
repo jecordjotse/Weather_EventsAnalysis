@@ -536,7 +536,7 @@ econDMGByType &lt;- econDMGByType %&gt;% mutate(ECONDMG = PROPDMG + CROPDMG) %&g
 <p>The top 20 EVTYPE is taken as we need the EVTYPE with the economic consequences.</p>
 <pre class="r"><code>temp &lt;- head(econDMGByType,20)
 meltedDMGByType &lt;- melt(temp, measure.vars = c(&quot;PROPDMG&quot;,&quot;CROPDMG&quot;), id = &quot;EVTYPE&quot;)</code></pre>
-<p>final results ploted on a bar chart. Again Tornados have the highest economic consequence. This is followed by Floods and Thunderstorm winds. Heat related weather almost goes to 0% of economic consequence. Considering the crop damage (bars in blue), snow related weather conditions cause the most economic consequence.</p>
+<p>final results ploted on a bar chart. Here floods have the highest economic consequence. This is followed by hurricane and tornado . Considering the crop damage (bars in iris blue), Drought, snow related then floods weather conditions cause the most economic consequence.</p>
 <pre class="r"><code>p&lt;-ggplot(data=arrange(meltedDMGByType,desc(value)), aes(x=reorder(EVTYPE, -value), y=value,fill=variable)) +
     geom_bar(stat=&quot;identity&quot;)+ggtitle(&quot;Economic Consequence by Weather Event Type&quot;)+ylab(&quot;Cost&quot;)+xlab(&quot;Weather Events&quot;)
 
@@ -545,7 +545,7 @@ p + coord_flip()</code></pre>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>The database was explored and results suggest tornado cause both the highest public health issues and economic consequences. A more detail project can be found in <a href="https://github.com/jecordjotse/Weather_EventsAnalysis">my GitHub repo</a></p>
+<p>The database was explored and results suggest tornado cause the highest public health issues and floods cause the highest economic consequences. A more detail project can be found in <a href="https://github.com/jecordjotse/Weather_EventsAnalysis">my GitHub repo</a></p>
 </div>
 <div id="refer" class="section level2">
 <h2>REFERENCE</h2>

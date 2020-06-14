@@ -231,7 +231,7 @@ temp <- head(econDMGByType,20)
 meltedDMGByType <- melt(temp, measure.vars = c("PROPDMG","CROPDMG"), id = "EVTYPE")
 ```
 final results ploted on a bar chart.
-Again Tornados have the highest economic consequence. This is followed by Floods and Thunderstorm winds. Heat related weather almost goes to 0% of economic consequence. Considering the crop damage (bars in blue), snow related weather conditions cause the most economic consequence.
+Here floods have the highest economic consequence. This is followed by hurricane and tornado . Considering the crop damage (bars in iris blue), Drought, snow related then floods weather conditions cause the most economic consequence.
 
 ```r
 p<-ggplot(data=arrange(meltedDMGByType,desc(value)), aes(x=reorder(EVTYPE, -value), y=value,fill=variable)) +
@@ -243,7 +243,7 @@ p + coord_flip()
 ![](report_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 ## Conclusion
-The database was explored and results suggest tornado cause both the highest public health issues and economic consequences.
+The database was explored and results suggest tornado cause the highest public health issues and floods cause the highest economic consequences.
 A more detail project can be found in [my GitHub repo](https://github.com/jecordjotse/Weather_EventsAnalysis)
 
 ## REFERENCE {#refer}
